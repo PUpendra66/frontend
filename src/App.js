@@ -2,34 +2,38 @@ import React, { useState } from "react";
 import axios from "axios";
 import "./App.css";
 
-const sendMessage = async () => {
-    if (input.trim() === "") return;
+function App() {
+    const [messages, setMessages] = useState([]);
+    const [input, setInput] = useState("");
 
-    const newMessages = [...messages, { sender: "User", text: input }];
-    setMessages(newMessages);
+    const sendMessage = async () => {
+        if (input.trim() === "") return;
 
-    try {
-        console.log("Sending message to API:", input);
-        console.log("API URL:", process.env.REACT_APP_API_URL);
+        const newMessages = [...messages, { sender: "User", text: input }];
+        setMessages(newMessages);
 
-        const response = await axios.post(
-            `${process.env.REACT_APP_API_URL}/api/send_message/`,
-            { message: input }
-        );
+        try {
+            console.log("Sending message to API:", input);
+            console.log("API URL:", process.env.REACT_APP_API_URL);
 
-        console.log("Received response:", response.data);
-        setMessages([...newMessages, { sender: "Bot", text: response.data.bot_reply }]);
+            const response = await axios.post(
+                `${process.env.REACT_APP_API_URL}/api/send_message/`,
+                { message: input }
+            );
 
-    } catch (error) {
-        console.error("Error sending message:", error);
-        if (error.response) {
-            console.error("Server response:", error.response.data);
+            console.log("Received response:", response.data);
+            setMessages([...newMessages, { sender: "Bot", text: response.data.bot_reply }]);
+
+        } catch (error) {
+            console.error("Error sending message:", error);
+            if (error.response) {
+                console.error("Server response:", error.response.data);
+            }
+            alert("Sorry, something went wrong. Please try again later.");
         }
-        alert("Sorry, something went wrong. Please try again later.");
-    }
 
-    setInput("");
-};
+        setInput("");
+    };
 
     return (
         <div className="chat-container">
@@ -50,6 +54,6 @@ const sendMessage = async () => {
             <button onClick={sendMessage}>Send</button>
         </div>
     );
-
+}
 
 export default App;
