@@ -2,30 +2,34 @@ import React, { useState } from "react";
 import axios from "axios";
 import "./App.css";
 
-function App() {
-    const [messages, setMessages] = useState([]);
-    const [input, setInput] = useState("");
+const sendMessage = async () => {
+    if (input.trim() === "") return;
 
-    const sendMessage = async () => {
-        if (input.trim() === "") return;
+    const newMessages = [...messages, { sender: "User", text: input }];
+    setMessages(newMessages);
 
-        const newMessages = [...messages, { sender: "User", text: input }];
-        setMessages(newMessages);
+    try {
+        console.log("Sending message to API:", input);
+        console.log("API URL:", process.env.REACT_APP_API_URL);
 
-        try {
-            const response = await axios.post(
-                `${process.env.REACT_APP_API_URL}/api/send_message/`,
-                { message: input }
-            );
+        const response = await axios.post(
+            `${process.env.REACT_APP_API_URL}/api/send_message/`,
+            { message: input }
+        );
 
-            setMessages([...newMessages, { sender: "Bot", text: response.data.bot_reply }]);
-        } catch (error) {
-            console.error("Error sending message", error);
-            alert("Sorry, something went wrong. Please try again later.");
+        console.log("Received response:", response.data);
+        setMessages([...newMessages, { sender: "Bot", text: response.data.bot_reply }]);
+
+    } catch (error) {
+        console.error("Error sending message:", error);
+        if (error.response) {
+            console.error("Server response:", error.response.data);
         }
+        alert("Sorry, something went wrong. Please try again later.");
+    }
 
-        setInput("");
-    };
+    setInput("");
+};
 
     return (
         <div className="chat-container">
@@ -46,6 +50,6 @@ function App() {
             <button onClick={sendMessage}>Send</button>
         </div>
     );
-}
+
 
 export default App;
